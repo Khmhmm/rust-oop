@@ -1,8 +1,27 @@
 use std::collections::HashMap;
+use std::ops::Deref;
 
-trait Class {
-    fn get_methods() -> Vec<(String, Method<Self>)> where Self: Sized;
+macro_rules! call {
+    ($class: expr, $method: expr, $arg: expr) => {
+        $class[$method](&$class, $arg)
+    }
 }
+
+trait Class{
+    fn get_methods() -> Vec<(String, Method<Self>)> where Self: Sized;
+    fn call(&self, name: &str, arg: BoxedArg) -> Option<()> where Self: Sized;
+    fn take_method(&self, name: &str) -> Option< &Method<Self> > where Self: Sized;
+}
+
+impl std::ops::Index<&str> for Parent
+{
+    type Output = Method<Self>;
+    
+    fn index(&self, i: &str) -> &Method<Self> {
+        self.take_method(i).expect(&format!("No such method: {}", i))
+    }
+}
+
 
 trait MethodArg {
     fn arg(&self) -> ();
@@ -15,7 +34,7 @@ impl MethodArg for i32{
 type BoxedArg = Box<dyn MethodArg>;
 
 
-struct Method<C> {
+struct Method<C: ?Sized> {
     inner: Box<dyn Fn(&C, BoxedArg) -> Result<(),()>>
 }
 impl<C> Method<C>{
@@ -33,6 +52,13 @@ impl<C> From<Box<dyn Fn(&C, BoxedArg) -> Result<(), ()>>> for Method<C> {
     }
 }
 
+impl<C> Deref for Method<C> {
+    type Target = Box<dyn Fn(&C, BoxedArg) -> Result<(), ()>>;
+    fn deref(&self) -> &Box<dyn Fn(&C, BoxedArg) -> Result<(), ()>> {
+        &self.inner
+    }
+}
+
 struct Parent {
     methods: HashMap<String, Method<Parent>>
 }
@@ -44,10 +70,6 @@ impl Parent {
         }
     }
     
-    pub fn call(&self, name: &str, arg: BoxedArg) -> Option<()> {
-        let method = self.methods.get(name)?;
-        method.call(&self, arg).ok()
-    }
 }
 
 impl Class for Parent {
@@ -67,9 +89,18 @@ impl Class for Parent {
         v
             
     }
+    
+    fn call(&self, name: &str, arg: BoxedArg) -> Option<()> {
+        let method = self.methods.get(name)?;
+        method.call(&self, arg).ok()
+    }
+    
+    fn take_method(&self, name: &str) -> Option<&Method<Parent>> {
+        self.methods.get(name)
+    }
 }
 
 fn main() {
     let p = Parent::construct();
-    p.call("show_name", Box::new(5i32));
+    call!(&p, "show_name", Box::new(5i32));
 }
