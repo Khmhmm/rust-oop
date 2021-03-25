@@ -1,15 +1,17 @@
 mod class;
 mod method;
 mod arg;
+mod field;
 
 pub use class::*;
 pub use method::*;
 pub use arg::*;
+pub use field::*;
 
 #[macro_export]
 macro_rules! call {
     ($class: expr, $method: expr, $arg: expr) => {
-        $class[$method](&$class, $arg)
+        $class[$method].take(&$class, $arg)
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::{BoxedArg, BoxedReturn};
+use crate::{BoxedArg, BoxedReturn, ClassMember};
 
 pub struct Method<C: ?Sized> {
     inner: Box<dyn Fn(&C, BoxedArg) -> BoxedReturn>
@@ -22,6 +22,12 @@ impl<C> std::ops::Deref for Method<C> {
     type Target = Box<dyn Fn(&C, BoxedArg) -> BoxedReturn>;
     fn deref(&self) -> &Box<dyn Fn(&C, BoxedArg) -> BoxedReturn> {
         &self.inner
+    }
+}
+
+impl<C> ClassMember<C> for Method<C> {
+    fn take(&self, caller: &C, arg: BoxedArg) -> BoxedReturn {
+        self.call(caller, arg)
     }
 }
 
