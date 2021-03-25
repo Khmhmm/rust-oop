@@ -1,5 +1,9 @@
 use std::collections::HashMap;
 
+trait Class {
+    fn get_methods() -> Vec<(String, Method<Self>)> where Self: Sized;
+}
+
 trait MethodArg {
     fn arg(&self) -> ();
 }
@@ -34,7 +38,20 @@ struct Parent {
 }
 
 impl Parent {
-    pub fn get_methods() -> Vec<(String, Method<Parent>)> {
+    pub fn construct() -> Parent {
+        Parent{
+            methods: Self::get_methods().into_iter().collect()
+        }
+    }
+    
+    pub fn call(&self, name: &str, arg: BoxedArg) -> Option<()> {
+        let method = self.methods.get(name)?;
+        method.call(&self, arg).ok()
+    }
+}
+
+impl Class for Parent {
+    fn get_methods() -> Vec<(String, Method<Parent>)> {
         let mut v = Vec::<(String, Method<Parent>)>::new();
         v.push(
             ("show_name".to_string(), 
@@ -49,16 +66,6 @@ impl Parent {
         
         v
             
-    }
-    pub fn construct() -> Parent {
-        Parent{
-            methods: Self::get_methods().into_iter().collect()
-        }
-    }
-    
-    pub fn call(&self, name: &str, arg: BoxedArg) -> Option<()> {
-        let method = self.methods.get(name)?;
-        method.call(&self, arg).ok()
     }
 }
 
