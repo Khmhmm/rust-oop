@@ -1,10 +1,19 @@
 use std::collections::HashMap;
 use std::ops::Deref;
 use oop_prelude::*;
+use oop_macro::*;
+
+// #[derive(Inherit)]
+// pub struct Dog{}
+// impl Dog{
+//     fn f1(&self) {}
+// }
+
 
 
 struct Parent {
-    members: HashMap<String, BoxedMember<Parent>>
+    members: HashMap<String, BoxedMember<Parent>>,
+    f: i32
 }
 
 impl ClassDefinition for Parent {
@@ -18,8 +27,16 @@ impl ClassDefinition for Parent {
                     ;
                     Box::new(Method::<Parent>::from(f))
                 }
-            )
-        );
+            ));
+        v.push(
+            ("get_len".to_string(),
+                {
+                    let f: BoxedRawMethod<Parent> =
+                        to_box!(|p, _| { Box::new(p.f.clone()) })
+                    ;
+                    Box::new(Method::<Parent>::from(f))
+                }
+            ));
 
         v
     }
@@ -32,7 +49,8 @@ impl ClassConstructor for Parent {
             members: Self::get_methods()
                 .into_iter()
                 .map(|(s, m)| (s, m as Box<dyn ClassMember<Parent>>))
-                .collect()
+                .collect(),
+            f: 1i32
         }
     }
 
@@ -55,5 +73,8 @@ impl std::ops::Index<&str> for Parent
 
 fn main() {
     let p = Parent::construct();
-    call!(&p, "show_name", Box::new(5i32));
+    println!( "{:?}", call!(&p, "get_len", Box::new(5i32)) );
+
+    // let d = Dog{};
+    // Dog::inherent_call(&d, Box::new(()));
 }

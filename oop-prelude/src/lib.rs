@@ -2,11 +2,13 @@ mod class;
 mod method;
 mod arg;
 mod field;
+mod macro_trait;
 
 pub use class::*;
 pub use method::*;
 pub use arg::*;
 pub use field::*;
+pub use macro_trait::*;
 
 #[macro_export]
 macro_rules! call {
