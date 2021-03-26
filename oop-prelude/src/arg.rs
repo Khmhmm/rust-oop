@@ -1,9 +1,11 @@
-pub trait MethodArg {}
+use std::fmt::Debug;
 
-impl<T> MethodArg for T{}
+pub trait MethodArg: Debug {}
+
+impl<T: Debug> MethodArg for T{}
 pub type BoxedArg = Box<dyn MethodArg>;
 
-pub trait MethodReturnable: std::fmt::Debug{}
-impl<T: std::fmt::Debug> MethodReturnable for T{}
+pub trait MethodReturnable: Debug{}
+impl<T: Debug> MethodReturnable for T{}
 
 pub type BoxedReturn = Box<dyn MethodReturnable>;

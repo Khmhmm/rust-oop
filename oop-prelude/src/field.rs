@@ -1,4 +1,4 @@
-use crate::{BoxedReturn, ClassMember, BoxedArg};
+use crate::{BoxedReturn, BoxedArg};
 
 pub struct Field {
     inner: BoxedReturn

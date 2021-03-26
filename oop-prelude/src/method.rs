@@ -1,4 +1,4 @@
-use crate::{BoxedArg, BoxedReturn, ClassMember};
+use crate::{BoxedArg, BoxedReturn};
 
 pub struct Method<C: ?Sized> {
     inner: Box<dyn Fn(&C, BoxedArg) -> BoxedReturn>
@@ -25,10 +25,32 @@ impl<C> std::ops::Deref for Method<C> {
     }
 }
 
-impl<C> ClassMember<C> for Method<C> {
-    fn take(&self, caller: &C, arg: BoxedArg) -> BoxedReturn {
-        self.call(caller, arg)
+// impl<C> ClassMember<C> for Method<C> {
+//     fn take(&self, caller: &C, arg: BoxedArg) -> BoxedReturn {
+//         self.call(caller, arg)
+//     }
+// }
+
+pub type BoxedRawMethod<C> = Box<dyn Fn(&C, BoxedArg) -> BoxedReturn>;
+
+
+pub struct MethodMut<C: ?Sized> {
+    inner: Box<dyn FnMut(&mut C, BoxedArg) -> BoxedReturn>
+}
+impl<C> MethodMut<C>{
+    #[inline]
+    pub fn call(&mut self, c: &mut C, arg: BoxedArg) -> BoxedReturn {
+        (self.inner)(c, arg)
     }
 }
 
-pub type BoxedRawMethod<C> = Box<dyn Fn(&C, BoxedArg) -> BoxedReturn>;
+
+impl<C> From<Box<dyn FnMut(&mut C, BoxedArg) -> BoxedReturn>> for MethodMut<C> {
+    fn from( f: Box<dyn FnMut(&mut C, BoxedArg) -> BoxedReturn> ) -> Self {
+        MethodMut {
+            inner: f
+        }
+    }
+}
+
+pub type BoxedRawMethodMut<C> = Box<dyn FnMut(&mut C, BoxedArg) -> BoxedReturn>;
