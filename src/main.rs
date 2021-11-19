@@ -98,6 +98,16 @@ pub mod inheritance {
 
     pub struct Base;
 
+    impl Base {
+        pub fn base(mut self) -> (Base, crate::MetaObject) {
+            panic!("Unable to call base class of the base class!");
+        }
+
+        pub fn backstep<T>(any: T, keep: crate::MetaObject) -> Self {
+            panic!("Unable to backstep the base class!");
+        }
+    }
+
     impl Class for Base {
         fn cast(map: crate::MetaObject) -> Self {
             Self{}
