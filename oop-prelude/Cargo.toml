@@ -1,7 +1,0 @@
-[package]
-name = "oop-prelude"
-version = "0.1.0"
-authors = ["khmhmm <matvey.zaharov@satellite-soft.ru>"]
-edition = "2018"
-
-[dependencies]
